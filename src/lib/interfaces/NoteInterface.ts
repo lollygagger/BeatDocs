@@ -1,5 +1,3 @@
-import {Note} from "tone/build/esm/core/type/NoteUnits";
-
 export interface Document {
     attributes: DocAttributes
     tracks: Track[]

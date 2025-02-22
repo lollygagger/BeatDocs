@@ -1,14 +1,12 @@
 import {
-    Color,
     GoogleDoc,
     RgbColor,
     rgbColorEquals,
     StructuralElement,
     Table,
     TableCell,
-    TextRun
 } from "./GoogleInterfaces";
-import {NoteObject, NoteType, Track} from "../interfaces/NoteInterface";
+import {DocAttributes, Document, NoteObject, NoteType, Track} from "../interfaces/NoteInterface";
 
 /**
  * Parses a typical Google Docs URL to extract the document ID.
@@ -108,7 +106,7 @@ function preprocessTableCells(cells: TableCell[]) {
         // outCells.push(cell)
 
         if (cellIndex === 0) {
-            trackName = getStringFromStrEl(cell.content[0])
+            trackName = getStringFromStrEl(cell.content[0]).trim()
             console.log(`Track name: ${trackName}`);
             continue
         }
@@ -193,15 +191,12 @@ function preprocessTableCells(cells: TableCell[]) {
     return {trackName: trackName, cells: cellRuns} as RowOfTableCells
 }
 
-const programOctave = 4
-
 interface MergableRow {
     trackName: string,
     cells: NoteObject[]
 }
 
-function extractDataFromTables(tables: Table[]): Track[] {
-    console.log('WHAT');
+function extractDataFromTables(tables: Table[], docControls: DocAttributes): Track[] {
     const unmergedRowsMap: Map<string, MergableRow> = new Map();
     
     for (const table of tables) {
@@ -264,7 +259,7 @@ function extractDataFromTables(tables: Table[]): Track[] {
                                 modify = '#'
                             }
                             
-                            noteObject.note = `${note}${modify}${programOctave + octaveAdd}`
+                            noteObject.note = `${note}${modify}${docControls.octave + octaveAdd}`
                         }
                         
                         noteObject.duration = rawNote.count
@@ -301,12 +296,58 @@ function extractDataFromTables(tables: Table[]): Track[] {
     } as Track));
 }
 
+function extractControls(strElements: StructuralElement[]): DocAttributes {
+    const propertyRegex = /^\s*\|\s*(Tempo|Octave|Loop)\s*:\s*([^|\n\r]+?)\s*(?:\||$)/gim;
+    let match: RegExpExecArray | null;
+    
+    let tempo = 120
+    let octave = 4
+    let loop = false
+    
+    for (const element of strElements) {
+        if (element.paragraph && element.paragraph.elements) {
+            console.log('Elements:');
+            console.log(element.paragraph.elements);
+
+            for (const paraElem of element.paragraph.elements) {
+                let contents = paraElem.textRun?.content
+                if (!contents) continue
+                
+                while ((match = propertyRegex.exec(contents)) !== null) {
+                    // match[1] is the property name, match[2] is the property value
+                    const name = match[1];
+                    const value = match[2].trim(); // remove any extra whitespace
+                    
+                    console.log(`Property: ${name}, Value: ${value}`);
+                    
+                    if (name === 'Tempo') {
+                        tempo = parseInt(value.replace('BMP', ''))
+                    } else if (name === 'Octave') {
+                        octave = parseInt(value)
+                    } else if (name === 'Loop') {
+                        loop = value.toLowerCase() === 'true'
+                    } else {
+                        console.error(`Invalid property name found: ${value}`)
+                    }
+                }
+            }
+        }
+    }
+    
+    return {
+        tempo: tempo,
+        octave: octave,
+        loop: loop
+    } as DocAttributes
+}
+
 /**
  * Walks the Google Docs structure to extract raw text from paragraphs.
  */
-function extractTextFromDoc(docData: GoogleDoc): string {
+function parseDocument(docData: GoogleDoc): Document | undefined {
     if (!docData.body || !docData.body.content) {
-        return "";
+        console.error('Document is malformed')
+        return undefined
     }
     
     // Extract tables
@@ -317,26 +358,19 @@ function extractTextFromDoc(docData: GoogleDoc): string {
         }
     }
     
-    let tableData = extractDataFromTables(tables);
+    // Extract control attributes
+    const docControls = extractControls(docData.body.content)
+    
+    let tableData = extractDataFromTables(tables, docControls);
     console.log('Table data:', tableData);
+
+    console.log('Doc controls:');
+    console.log(docControls);
     
-    // Extract top control paragraphs
-    
-    let fullText = "";
-    for (const element of docData.body.content) {
-        if (element.paragraph && element.paragraph.elements) {
-            for (const paraElem of element.paragraph.elements) {
-                let contents = paraElem.textRun?.content
-                if (contents && contents.includes('Controls')) {
-                    fullText += contents;
-                }
-            }
-        }
-    }
-    
-    console.log('Control full text:', fullText);
-    
-    return fullText.trim();
+    return {
+        attributes: docControls,
+        tracks: tableData
+    } as Document
 }
 
 export async function initialize(tab: string): Promise<void> {
@@ -353,8 +387,11 @@ export async function initialize(tab: string): Promise<void> {
 
         const docData = await fetchGoogleDoc(token, docId);
 
-        const textContent = extractTextFromDoc(docData);
-        console.log("Extracted text:", textContent);
+        const parsedDocument = parseDocument(docData);
+        if (!parsedDocument) return
+        
+        console.log("Parsed document:");
+        console.log(JSON.stringify(parsedDocument));
     } catch (err) {
         console.error("Error fetching doc:", err);
     }
