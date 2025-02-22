@@ -34,21 +34,20 @@
         "notes": [
           {
             "type": "staccato",
-            "note": "A",
-            "octave": "default (unset) / +1 / -1"
+            "note": "A4"
           },
           {
             "type": "legato",
-            "notes": ["A", "B", "C"]
+            "note": "A"
           },
           {
             "type": "continuous",
-            "note": "A_f",
+            "note": "Ab4",
             "duration": "3"
           },
           {
             "type": "normal",
-            "note": "A_s"
+            "note": "A#4"
           },
           {
             "type": "skip",
