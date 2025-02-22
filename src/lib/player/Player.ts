@@ -1,4 +1,5 @@
 import * as Tone from 'tone';
+import {NoteObject} from "../interfaces/NoteInterface";
 
 const BPM = 100
 

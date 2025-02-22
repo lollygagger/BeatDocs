@@ -1,4 +1,14 @@
-import {Color, GoogleDoc, RgbColor, StructuralElement, Table, TableCell, TextRun} from "./GoogleInterfaces";
+import {
+    Color,
+    GoogleDoc,
+    RgbColor,
+    rgbColorEquals,
+    StructuralElement,
+    Table,
+    TableCell,
+    TextRun
+} from "./GoogleInterfaces";
+import {NoteObject, NoteType, Track} from "../interfaces/NoteInterface";
 
 /**
  * Parses a typical Google Docs URL to extract the document ID.
@@ -58,24 +68,19 @@ async function fetchGoogleDoc(token: string, docId: string): Promise<GoogleDoc> 
     return docData;
 }
 
-// interface RawCellPiece {
-//     text?: string
-//     color?: Color
-//     superscript?: boolean
-// }
-
 export type NoteModifier = 'flat' | 'sharp'
-
 
 interface RawNote {
     str: string,
     color: RgbColor,
     count: number // If this is 'A-A' this is 2. If it's 'A' it's 1
     modifier?: NoteModifier
+    staccato?: boolean
+    legato?: boolean
 }
 
 interface CellRuns {
-    runs: RawNote[]
+    rawNotes: RawNote[]
 }
 
 interface RowOfTableCells {
@@ -118,7 +123,7 @@ function preprocessTableCells(cells: TableCell[]) {
 
         for (let i = 0; i < paraElements.length; i++) {
             const paragraphElem = paraElements[i];
-            var cellTextRun = paragraphElem.textRun
+            const cellTextRun = paragraphElem.textRun
             
             if (!cellTextRun) continue
             
@@ -134,17 +139,35 @@ function preprocessTableCells(cells: TableCell[]) {
                 // this superscript will be applied to the previous text run
                 
                 if (noteContents === 'b') {
+                    console.log('flat');
                     rawNotes[rawNotes.length - 1].modifier = 'flat'
                 } else if (noteContents === '#') {
+                    console.log('sharp');
                     rawNotes[rawNotes.length - 1].modifier = 'sharp'
                 }
             } else { // Normal text
+                console.log(`Normal text: ${noteContents}`);
+                
+                // The previous note was a modifier, so we assume this is the same note
+                if (noteContents.startsWith('-')) {
+                    const count = noteContents.length - 1; // Count the number of "-"
+                    console.log(`notes to add to previous from '${noteContents}': ${count}`);
+                    
+                    rawNotes[rawNotes.length - 1].count += count
+                    continue
+                }
+                
                 let color: RgbColor = {red: 0, green: 0, blue: 0}
                 
                 if (cellTextRun.textStyle?.foregroundColor?.color?.rgbColor) {
                     color = cellTextRun.textStyle.foregroundColor.color.rgbColor
                     console.log('Color:', color);
                 }
+
+                let italics = cellTextRun.textStyle?.italic ?? false
+                let underline = cellTextRun.textStyle?.underline ?? false
+                
+                console.log(`Italics: ${italics} Underline: ${underline}`);
 
                 let splitNotes = noteContents.split(RegExp('\\s+')).filter(note => note.length > 0);
                 console.log(splitNotes);
@@ -158,18 +181,29 @@ function preprocessTableCells(cells: TableCell[]) {
                         note = splitByDash[0]
                     }
                     
-                    rawNotes.push({str: note, count: count, color: color})
+                    // Staccato, legato, cont. will be verified later
+                    rawNotes.push({str: note, count: count, color: color, staccato: italics, legato: underline})
                 }
             }
         }
         
-        cellRuns.push({runs: rawNotes})
+        cellRuns.push({rawNotes: rawNotes})
     }
     
     return {trackName: trackName, cells: cellRuns} as RowOfTableCells
 }
 
-function extractDataFromTables(tables: Table[]) {
+const programOctave = 4
+
+interface MergableRow {
+    trackName: string,
+    cells: NoteObject[]
+}
+
+function extractDataFromTables(tables: Table[]): Track[] {
+    console.log('WHAT');
+    const unmergedRowsMap: Map<string, MergableRow> = new Map();
+    
     for (const table of tables) {
         if (!table.tableRows) continue;
         
@@ -182,46 +216,89 @@ function extractDataFromTables(tables: Table[]) {
             if (!row.tableCells) continue
 
             let cellz = row.tableCells
-            console.log('Before:');
-            console.log(cellz);
             
-            const preprocessed = preprocessTableCells(cellz)
-            
-            console.log("After:");
-            console.log(preprocessed);
-            
-            // let notes: NoteObject[] = [];
-            // let rawPieces: RawCellPiece[] = []
-            // for (let cellIndex = 0; cellIndex < row.tableCells.length; cellIndex++) {
-            //     const cell = row.tableCells[cellIndex];
-            //     if (!cell.content) continue;
-            //    
-            //     if (cellIndex === 0) {
-            //         console.log(`Track name: ${cell.content}`);
-            //         continue
-            //     }
-            //    
-            //     console.log(`Cell ${cellIndex} content:`, cell.content);
-            //    
-            //     const content = cell.content[0]
-            //     let paraElements = content.paragraph?.elements
-            //     if (!paraElements) continue;
-            //    
-            //     for (const paragraphElem of paraElements) {
-            //         const noteContents = paragraphElem.textRun?.content
-            //         if (!noteContents) continue
-            //        
-            //         let duration = 1
-            //         if (noteContents.includes('-')) {
-            //            
-            //         }
-            //     }
-            //
-            //     // rawPieces.push(...parseRawCallPieces(content.paragraph));
-            //     // console.log(`Cell ${cellIndex} content:`, cell.content);
-            // }
+            const processedCells = preprocessTableCells(cellz)
+            console.log('Processed cells:');
+            console.log(processedCells);
+
+            let noteObjects: NoteObject[] = []
+            for (let cell of processedCells.cells) {
+                for (let rawNote of cell.rawNotes) {
+                    let modifierCount = (rawNote.staccato ? 1 : 0) +
+                        (rawNote.legato ? 1 : 0) +
+                        (rawNote.str === '.' ? 1 : 0) +
+                        (rawNote.count > 1 ? 1 : 0)
+                    
+                    if (modifierCount > 1) {
+                        console.error(`Too many modifiers for note: ${rawNote}`);
+                    } else {
+                        let noteType: NoteType = 'normal'
+                        let note = rawNote.str
+                        
+                        if (rawNote.staccato) {
+                            noteType = 'staccato'
+                        } else if (rawNote.legato) {
+                            noteType = 'legato'
+                        } else if (rawNote.str === '.') {
+                            noteType = 'skip'
+                        } else if (rawNote.count > 1) {
+                            noteType = 'continuous'
+                        }
+
+                        let noteObject: NoteObject = {type: noteType}
+                        
+                        if (noteType !== 'skip') {
+                            let octaveAdd = 0
+                            
+                            if (rgbColorEquals(rawNote.color, 1, 0, 0)) {
+                                octaveAdd = 1
+                            } else if (rgbColorEquals(rawNote.color, 0, 0, 1)) {
+                                octaveAdd = -1
+                            }
+                            
+                            let modify = ''
+                            
+                            if (rawNote.modifier === 'flat') {
+                                modify = 'b'
+                            } else if (rawNote.modifier === 'sharp') {
+                                modify = '#'
+                            }
+                            
+                            noteObject.note = `${note}${modify}${programOctave + octaveAdd}`
+                        }
+                        
+                        noteObject.duration = rawNote.count
+                        
+                        noteObjects.push(noteObject)
+                    }
+                }
+            }
+
+            // Merge in the MergableRow
+            const key = processedCells.trackName;
+            const newRow: MergableRow = { trackName: key, cells: noteObjects };
+
+            if (!unmergedRowsMap.has(key)) {
+                unmergedRowsMap.set(key, newRow);
+            } else {
+                const existingRow = unmergedRowsMap.get(key);
+                if (existingRow) {
+                    // Perform your operation here, for example, merging cells
+                    existingRow.cells.push(...newRow.cells);
+                }
+            }
         }
     }
+    
+    console.log(unmergedRowsMap);
+    
+    // Convert MergableRows to Track[]
+    
+    return Array.from(unmergedRowsMap.values()).map(row => ({
+        name: row.trackName,
+        metadata: {}, // TODO: Get Metadata
+        notes: row.cells
+    } as Track));
 }
 
 /**

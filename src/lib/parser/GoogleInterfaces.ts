@@ -65,6 +65,14 @@ export interface RgbColor {
     blue?: number;
 }
 
+export function rgbColorEquals(rgbColor: RgbColor, red: number, green: number, blue: number) {
+    let realRed = rgbColor.red ?? 0
+    let realGreen = rgbColor.green ?? 0
+    let realBlue = rgbColor.blue ?? 0
+    
+    return realRed === red && realGreen === green && realBlue === blue;
+}
+
 // Styling information for a paragraph.
 export interface ParagraphStyle {
     alignment?: "START" | "CENTER" | "END" | "JUSTIFIED";

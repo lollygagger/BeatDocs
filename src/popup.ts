@@ -6,7 +6,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// Wait for the document to be ready, then bind a click to play the tone
-document.addEventListener('click', async () => {
-    console.log("Clicked")
-});
+chrome.runtime.sendMessage({ action: "popupOpened", "url": window.location.href });
