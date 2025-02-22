@@ -1,0 +1,19 @@
+import * as Tone from 'tone';
+import {BeatInstrument} from "../interfaces/NoteInterface"
+import {MembraneSynth, MetalSynth, PluckSynth, Sampler, Synth} from "tone";
+import {Monophonic} from "tone/build/esm/instrument/Monophonic";
+
+function createSynthFromInstrument(instrument: BeatInstrument): any {
+    switch(instrument.name){
+        case "MetalSynth":
+            return new MetalSynth(instrument.properties);
+        case "PluckSynth":
+            return new PluckSynth(instrument.properties);
+        case "MembraneSynth":
+            return new MembraneSynth(instrument.properties);
+        case "Sampler":
+            return new Sampler(instrument.properties);
+    }
+
+    return null
+}
