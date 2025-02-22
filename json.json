@@ -2,7 +2,8 @@
   "doc": {
     "attributes": {
       "tempo": "160",
-      "loop": false
+      "loop": false,
+      "octave": 4
     },
     "tracks": [
       {
