@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
-    "strict": true,
-    "module": "commonjs",
     "target": "es6",
-    "esModuleInterop": true,
+    "module": "esnext",
+    "lib": ["dom", "es6"],
+    "outDir": "./dist",
+    "strict": true,
     "sourceMap": true,
-    "rootDir": "src",
-    "outDir": "dist/js",
-    "noEmitOnError": true,
-    "typeRoots": [ "node_modules/@types" ]
-  }
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

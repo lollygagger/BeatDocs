@@ -2,12 +2,12 @@
   "name": "beatdocs",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/background.js",
   "directories": {
     "lib": "lib"
   },
   "scripts": {
-    "build": "webpack --config webpack/webpack.config.js"
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
