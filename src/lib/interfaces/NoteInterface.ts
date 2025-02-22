@@ -28,3 +28,9 @@ export interface BeatEffect {
     name: string; // e.g., "reverb"
     options: Record<string, any>;
 }
+
+export interface DocAttributes {
+    tempo: number // in BPM
+    octave: number
+    loop: boolean
+}
