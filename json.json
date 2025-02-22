@@ -1,0 +1,60 @@
+{
+  "doc": {
+    "attributes": {
+      "key": "A",
+      "tempo": "160",
+    },
+    "tracks": [
+      {
+        "name": "track1",
+        "metadata": {
+          "instrument": {
+            "name": "MetalSynth",
+            "properties": { // all umber properties of instrument + envelope + filter (if used)
+              "volume": "1",
+              // ...
+              "envelope": {
+                
+              },
+              "filter": {
+                
+              }
+            }
+          },
+          "effects": [
+            {
+              "name": "reverb",
+              "options": {
+                //
+              }
+            }
+          ]
+        },
+        "notes": [
+          {
+            "type": "staccato",
+            "note": "A",
+            "octave": "default (unset) / +1 / -1"
+          },
+          {
+            "type": "legato",
+            "notes": ["A", "B", "C"]
+          },
+          {
+            "type": "continuous",
+            "note": "A_f",
+            "duration": "3"
+          },
+          {
+            "type": "normal",
+            "note": "A_s"
+          },
+          {
+            "type": "skip",
+            "duration": "3"
+          }
+        ]
+      }
+    ]
+  }
+}
