@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "My TypeScript Chrome Extension",
+  "name": "BeatDocs",
   "version": "1.0",
-  "description": "A simple Chrome extension built with TypeScript.",
+  "description": "Make beats in google docs",
   "background": {
     "service_worker": "background.js"
   },
@@ -16,7 +16,14 @@
     }
   ],
   "permissions": [
+    "identity",
     "storage",
     "activeTab"
-  ]
+  ],
+  "oauth2": {
+    "client_id": "718961512533-gudhtg4jdgc9q830c8gmoscij0hjb7jl.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/documents.readonly"
+    ]
+  }
 }
