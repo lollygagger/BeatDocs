@@ -6,22 +6,22 @@ import * as Tone from 'tone';
 export async function orchestratePlay(document: Document) {
     //first parse settings and create a player object
     let player = new Player(document.attributes.tempo, document.attributes.loop)
-    
+
     let sequences: Tone.Sequence<any>[] = []
-    
+
     //Start creating instruments
     document.tracks.forEach((track) => {
         console.log(`Parsing track: ${track.name}`)
-        
-    let synth = createSynthFromInstrument(track.metadata.instrument).toDestination()
 
-        if(track.metadata.effects){
+        let synth = createSynthFromInstrument(track.metadata.instrument).toDestination()
+
+        if (track.metadata.effects) {
             console.log("Creating Effects")
             let effects: any[] = []
             track.metadata.effects.forEach(effect => {
                 effects.push(createEffect(effect))
             })
-            
+
             if (effects.length !== 0) {
                 console.log("Connecting Effects to Instrument")
                 connectEffects(synth, effects)
@@ -57,10 +57,10 @@ export class Player {
         const times = track.map((noteObj, index) => index); // Assuming each note is spaced 1 beat apart
         const actions = track.map((noteObj) => {
             return (time: any) => {
-                const { type, note, duration } = noteObj;
-                
+                const {type, note, duration} = noteObj;
+
                 if (note === undefined) return;
-                
+
                 console.log(`Playing ${note} at ${time}`);
 
                 // Handle different note types with appropriate synth calls
@@ -86,7 +86,7 @@ export class Player {
         );
     }
 
-    public playAudio(sequenceList: Tone.Sequence[]){
+    public playAudio(sequenceList: Tone.Sequence[]) {
         Tone.getTransport().bpm.value = this.BPM;
         sequenceList.forEach((sequence: Tone.Sequence) => {
             sequence.loop = this.loop
@@ -95,7 +95,7 @@ export class Player {
         Tone.getTransport().start();
     }
 
-    public static stopAudio(){
+    public static stopAudio() {
         Tone.getTransport().stop();
     }
 }

@@ -32,6 +32,7 @@ export interface StructuralElement {
 export interface Paragraph {
     elements?: ParagraphElement[];
     paragraphStyle?: ParagraphStyle;
+    bullet: {}
 }
 
 // An element within a paragraph.
