@@ -3,4 +3,4 @@ Install the required dependencies then go to [google cloud's google auth platfor
 
 After run `npm run build` to create a new build
 
-Then navigate to chrome manage extensions(make sure dev mode is turned on) and click "Load Unpacked" and when prompted select your `/dist` directory created from npm run build.
+Then navigate to google chrome and go click the extensions button -> manage extensions(make sure dev mode is turned on) and click "Load Unpacked" and when prompted select your `/dist` directory created from npm run build.
