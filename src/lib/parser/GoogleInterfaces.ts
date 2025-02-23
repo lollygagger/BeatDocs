@@ -1,14 +1,23 @@
-// Represents an entire Google Document.
-export interface GoogleDoc {
-    title?: string;
+export interface TabbedGoogleDoc {
+    tabs: DocTab[]
+}
+
+export interface DocTab {
+    documentTab: DocumentTab,
+    tabProperties: TabProperties
+}
+
+export interface DocumentTab {
     body?: {
         // The document body contains an array of StructuralElements.
         content?: StructuralElement[];
     };
-    // You might also have headers, footers, etc.
-    // For example:
-    // headers?: { [key: string]: StructuralElement[] };
-    // footers?: { [key: string]: StructuralElement[] };
+}
+
+export interface TabProperties {
+    index: number,
+    tabId: string,
+    title: string
 }
 
 // A StructuralElement is a union of possible element types.

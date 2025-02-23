@@ -1,12 +1,14 @@
 import {
-    GoogleDoc,
+    DocumentTab,
     RgbColor,
     rgbColorEquals,
-    StructuralElement,
+    StructuralElement, TabbedGoogleDoc,
     Table,
     TableCell,
 } from "./GoogleInterfaces";
 import {DocAttributes, Document, NoteObject, NoteType, Track} from "../interfaces/NoteInterface";
+import {orchestratePlay} from "../player/Player";
+// import {orchestratePlay} from "../../popup";
 
 /**
  * Parses a typical Google Docs URL to extract the document ID.
@@ -50,8 +52,8 @@ function getAuthTokenInteractive(): Promise<string> {
 /**
  * Fetched google doc contents via API.
  */
-async function fetchGoogleDoc(token: string, docId: string): Promise<GoogleDoc> {
-    const url = `https://docs.googleapis.com/v1/documents/${docId}`;
+async function fetchGoogleDoc(token: string, docId: string): Promise<TabbedGoogleDoc> {
+    const url = `https://docs.googleapis.com/v1/documents/${docId}?includeTabsContent=true`;
     const res = await fetch(url, {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -62,7 +64,9 @@ async function fetchGoogleDoc(token: string, docId: string): Promise<GoogleDoc> 
         throw new Error(`Failed to fetch doc: ${res.status} ${res.statusText}`);
     }
 
-    const docData = (await res.json()) as GoogleDoc;
+    let js = (await res.json())
+    console.log(js);
+    const docData = js as TabbedGoogleDoc;
     return docData;
 }
 
@@ -344,7 +348,8 @@ function extractControls(strElements: StructuralElement[]): DocAttributes {
 /**
  * Walks the Google Docs structure to extract raw text from paragraphs.
  */
-function parseDocument(docData: GoogleDoc): Document | undefined {
+function parseDocument(docData: DocumentTab): Document | undefined {
+    console.log(docData);
     if (!docData.body || !docData.body.content) {
         console.error('Document is malformed')
         return undefined
@@ -385,13 +390,15 @@ export async function initialize(tab: string): Promise<void> {
         // Request an OAuth token (this may prompt the user if not already granted)
         const token = await getAuthTokenInteractive();
 
-        const docData = await fetchGoogleDoc(token, docId);
-
-        const parsedDocument = parseDocument(docData);
-        if (!parsedDocument) return
+        const docTabs = (await fetchGoogleDoc(token, docId)).tabs;
+        let mainTab = docTabs[0]
+        let effectTab = docTabs[1]
         
-        console.log("Parsed document:");
-        console.log(JSON.stringify(parsedDocument));
+        const parsedDocument = parseDocument(mainTab.documentTab);
+        
+        if (!parsedDocument) return
+
+        orchestratePlay(parsedDocument)
     } catch (err) {
         console.error("Error fetching doc:", err);
     }
