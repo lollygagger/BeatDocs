@@ -1,15 +1,25 @@
-import {BeatEffect, Document} from "./lib/interfaces/NoteInterface";
-import {Player} from "./lib/player/Player"
-import {createSynthFromInstrument} from "./lib/player/InstrumentFactory";
-import {connectEffects, createEffect} from "./lib/player/EffectFactory";
-import { Sequence } from "tone";
+import {initialize} from "./lib/parser/DocLookup";
 
-// document.addEventListener('DOMContentLoaded', () => {
-//     const messageEl = document.getElementById("message");
-//     if (messageEl) {
-//         messageEl.textContent = "Hello from your TypeScript-powered popup!";
-//     }
-// });
+document.addEventListener('DOMContentLoaded', () => {
 
+    document.getElementById('ballz')?.addEventListener("click", pressShit);
+    // const messageEl = document.getElementById("message");
+    // if (messageEl) {
+    //     messageEl.textContent = "Hello from your TypeScript-powered popup!";
+    // }
+    
+    console.log(document.getElementById('ballz'));
+});
 
-chrome.runtime.sendMessage({action: "popupOpened", "url": window.location.href});
+function pressShit() {
+    console.log('ahhh');
+
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+        if (tabs.length > 0 && tabs[0].url) {
+            const currentUrl = tabs[0].url;
+            await initialize(currentUrl);
+        }
+    });
+}
+
+// chrome.runtime.sendMessage({action: "popupOpened", "url": window.location.href});

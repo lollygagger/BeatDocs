@@ -4,18 +4,20 @@ import {Sequence} from "tone";
 import {createSynthFromInstrument} from "./InstrumentFactory";
 import {connectEffects, createEffect} from "./EffectFactory";
 
-export function orchestratePlay(document: Document) {
+export async function orchestratePlay(document: Document) {
     //first parse settings and create a player object
     let player = new Player(document.attributes.tempo, document.attributes.loop)
 
     let sequences: Sequence<any>[] = []
+    
 
     //Start creating instruments
     document.tracks.forEach((track) => {
         console.log(`Parsing track: ${track.name}`)
 
         console.log("Creating Instrument")
-        let synth = createSynthFromInstrument(track.metadata.instrument)
+        let synth = new Tone.PluckSynth()
+        // let synth = createSynthFromInstrument(track.metadata.instrument)
 
         if(track.metadata.effects){
             console.log("Creating Effects")
@@ -68,7 +70,7 @@ export class Player {
         { type: "normal", note: "G4" }
     ];
 
-    public createSequenceFromTrack(synth: Tone.Synth, track: NoteObject[]): Tone.Sequence {
+    public createSequenceFromTrack(synth: any, track: NoteObject[]): Tone.Sequence {
         // Create an array of times and corresponding actions for the sequence
         const times = track.map((noteObj, index) => index); // Assuming each note is spaced 1 beat apart
         const actions = track.map((noteObj) => {

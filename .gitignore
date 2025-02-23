@@ -1,5 +1,3 @@
 /.idea/
 node_modules/
 dist/
-src/popup.html
-src/popup.ts
