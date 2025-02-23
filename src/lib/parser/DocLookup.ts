@@ -8,7 +8,6 @@ import {
 } from "./GoogleInterfaces";
 import {DocAttributes, Document, NoteObject, NoteType, Track} from "../interfaces/NoteInterface";
 import {orchestratePlay} from "../player/Player";
-// import {orchestratePlay} from "../../popup";
 
 /**
  * Parses a typical Google Docs URL to extract the document ID.
@@ -380,7 +379,7 @@ function parseDocument(docData: DocumentTab): Document | undefined {
     } as Document
 }
 
-export async function initialize(tab: string): Promise<void> {
+export async function initializeDocContents(tab: string): Promise<Document | undefined> {
     // Try to parse the docId from the current tab's URL
     const docId = getDocIdFromUrl(tab);
     if (!docId) {
@@ -398,9 +397,10 @@ export async function initialize(tab: string): Promise<void> {
         
         const parsedDocument = parseDocument(mainTab.documentTab);
         
-        if (!parsedDocument) return
+        console.log('Returning parsed doc');
+        return parsedDocument
 
-        orchestratePlay(parsedDocument)
+        // await orchestratePlay(parsedDocument)
     } catch (err) {
         console.error("Error fetching doc:", err);
     }

@@ -1,16 +1,20 @@
-import {initialize} from "./lib/parser/DocLookup";
+import {initializeDocContents} from "./lib/parser/DocLookup";
 
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-    if (message.action === "popupOpened") {
-        console.log("Popup has been opened.");
-
-        chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-            if (tabs.length > 0 && tabs[0].url) {
-                const currentUrl = tabs[0].url;
-                await initialize(currentUrl);
-            }
-        });
-    } else if (message.action === "performAction") {
-        console.log("Received request to perform background action.");
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "getData") {
+        console.log("Background received request for data from:", sender.tab?.id);
+        // Return the promise directly. Chrome will automatically send the resolved value as the response.
+        
+        initializeDocContents(request.url)
+            .then((data) => {
+                console.log("Data obtained:", data);
+                sendResponse(data)
+            })
+            .catch((error) => {
+                console.error("Error in initializeDocContents:", error);
+                sendResponse(undefined)
+            });
+        
+        return true;
     }
 });

@@ -1,18 +1,17 @@
 import {BeatInstrument} from "../interfaces/NoteInterface"
+import * as Tone from "tone";
 // import Tone, { MembraneSynth, MetalSynth, PluckSynth, Sampler, Synth } from 'tone';
-import {Monophonic} from "tone/build/esm/instrument/Monophonic";
-import {MembraneSynth, MetalSynth, PluckSynth, Sampler} from "tone";
 
 export function createSynthFromInstrument(instrument: BeatInstrument): any {
     switch(instrument.name){
         case "MetalSynth":
-            return new MetalSynth(instrument.properties);
+            return new Tone.MetalSynth(instrument.properties);
         case "PluckSynth":
-            return new PluckSynth(PluckSynth.getDefaults());
+            return new Tone.PluckSynth();
         case "MembraneSynth":
-            return new MembraneSynth(instrument.properties);
+            return new Tone.MembraneSynth(instrument.properties);
         case "Sampler":
-            return new Sampler(instrument.properties);
+            return new Tone.Sampler(instrument.properties);
 
         default:
             throw new Error(`Instrument type ${instrument.name} is not supported`);

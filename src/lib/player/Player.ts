@@ -1,23 +1,20 @@
-import * as Tone from 'tone';
 import {BeatEffect, Document, NoteObject} from "../interfaces/NoteInterface";
-import {Sequence} from "tone";
 import {createSynthFromInstrument} from "./InstrumentFactory";
 import {connectEffects, createEffect} from "./EffectFactory";
+import * as Tone from 'tone';
+import {start} from "tone";
 
 export async function orchestratePlay(document: Document) {
     //first parse settings and create a player object
     let player = new Player(document.attributes.tempo, document.attributes.loop)
-
-    let sequences: Sequence<any>[] = []
     
-
+    let sequences: Tone.Sequence<any>[] = []
+    
     //Start creating instruments
     document.tracks.forEach((track) => {
         console.log(`Parsing track: ${track.name}`)
-
-        console.log("Creating Instrument")
-        let synth = new Tone.PluckSynth()
-        // let synth = createSynthFromInstrument(track.metadata.instrument)
+        
+    let synth = createSynthFromInstrument(track.metadata.instrument).toDestination()
 
         if(track.metadata.effects){
             console.log("Creating Effects")
@@ -41,7 +38,7 @@ export async function orchestratePlay(document: Document) {
 export class Player {
     public BPM: number;
     public loop: boolean;
-    
+
     private defaultNote = "4n"
     private oneBeatInSeconds = 0.03
 
@@ -76,6 +73,8 @@ export class Player {
         const actions = track.map((noteObj) => {
             return (time: any) => {
                 const { type, note, duration } = noteObj;
+                
+                console.log(`Playing ${note} at ${time}`);
 
                 // Handle different note types with appropriate synth calls
                 if (type === 'staccato' && note) {
