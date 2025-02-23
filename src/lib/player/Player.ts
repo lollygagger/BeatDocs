@@ -39,9 +39,9 @@ export function orchestratePlay(document: Document) {
 export class Player {
     public BPM: number;
     public loop: boolean;
-
-    private defaultNote = "0:1:0"
-    private oneBeatInSeconds = Tone.Time(this.defaultNote).toSeconds()
+    
+    private defaultNote = "4n"
+    private oneBeatInSeconds = 0.03
 
     //create longer and shorter releases based on the bpm
     private staccatoLength = this.oneBeatInSeconds - (0.05 * this.oneBeatInSeconds)

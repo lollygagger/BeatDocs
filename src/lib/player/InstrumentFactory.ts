@@ -8,7 +8,7 @@ export function createSynthFromInstrument(instrument: BeatInstrument): any {
         case "MetalSynth":
             return new MetalSynth(instrument.properties);
         case "PluckSynth":
-            return new PluckSynth(instrument.properties);
+            return new PluckSynth();
         case "MembraneSynth":
             return new MembraneSynth(instrument.properties);
         case "Sampler":

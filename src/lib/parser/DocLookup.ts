@@ -295,7 +295,9 @@ function extractDataFromTables(tables: Table[], docControls: DocAttributes): Tra
     
     return Array.from(unmergedRowsMap.values()).map(row => ({
         name: row.trackName,
-        metadata: {}, // TODO: Get Metadata
+        metadata: {
+            instrument: {name: row.trackName, properties: {}},
+        }, // TODO: Get Metadata
         notes: row.cells
     } as Track));
 }
