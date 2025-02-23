@@ -24,7 +24,7 @@ export interface Metadata {
 
 export interface BeatInstrument {
     name: string; // e.g., "MetalSynth"
-    properties:  Record<string, any>;
+    properties: Record<string, any>;
 }
 
 export interface BeatEffect {
