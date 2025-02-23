@@ -19,7 +19,9 @@ export async function orchestratePlay(document: Document) {
             console.log("Creating Effects")
             let effects: any[] = []
             track.metadata.effects.forEach(effect => {
-                effects.push(createEffect(effect))
+                if (effect.name !== '') {
+                    effects.push(createEffect(effect))
+                }
             })
 
             if (effects.length !== 0) {

@@ -25,6 +25,9 @@ export function createEffect(effect: BeatEffect): any {
 
         case 'phaser':
             return new Tone.Phaser(effect.options).toDestination();
+            
+        case 'bitcrusher':
+            return new Tone.BitCrusher(effect.options).toDestination();
 
         default:
             throw new Error(`Effect type ${effect.name} is not supported`);

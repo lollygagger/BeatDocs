@@ -425,6 +425,8 @@ function parseEffects(tracks: Track[], docTab: DocTab): void {
                 let inBullet = false
                 
                 function resetBulletPointStruct() {
+                    if (bulletTitle === '') return
+                    
                     console.log(`-------------------- Ending bullet point struct for ${bulletTitle ?? '?'}`);
                     console.log(currentBulletStruct);
                     // effects[effects.length - 1].options[bulletTitle ?? '?'] = currentBulletStruct
