@@ -7,7 +7,7 @@ export async function orchestratePlay(document: Document) {
     //first parse settings and create a player object
     let player = new Player(document.attributes.tempo, document.attributes.loop)
 
-    let sequences: Tone.Sequence<any>[] = []
+    let sequences: Tone.Part<any>[] = []
 
     //Start creating instruments
     document.tracks.forEach((track) => {
@@ -34,6 +34,10 @@ export async function orchestratePlay(document: Document) {
 
     console.log("Playing sequences")
     player.playAudio(sequences)
+    // sequences.forEach(part => part.start(0));
+    //
+    // // Start the Tone.Transport to begin playback
+    // Tone.getTransport().start();
 }
 
 export class Player {
@@ -52,61 +56,66 @@ export class Player {
         this.BPM = bpm;
     }
 
-    public createSequenceFromTrack(synth: any, track: NoteObject[]): Tone.Sequence {
-        // Create an array of times and corresponding actions for the sequence
-        const times = track.map((noteObj, index) => index); // Assuming each note is spaced 1 beat apart
-        const actions = track.map((noteObj) => {
-            return (time: any) => {
-                const {type, note, duration} = noteObj;
+    public createSequenceFromTrack(synth: any, track: NoteObject[]): Tone.Part {
+        let currentTime = 0; // Initialize the current time to zero
 
-                if (note === undefined) return;
+        // Create an array to hold the scheduled events
+        const events = track.map((noteObj) => {
+            const { type, note, duration } = noteObj;
 
-                console.log(`Playing ${note} at ${time}`);
+            // Determine the duration of the note
+            let noteDuration;
+            if (type === 'staccato') {
+                noteDuration = `0:${this.staccatoLength}:0`;
+            } else if (type === 'legato') {
+                noteDuration = `0:${this.legatoLength}:0`;
+            } else if (type === 'continuous' && duration) {
+                noteDuration = `0:${duration}:0`; // Use the provided duration
+            } else {
+                noteDuration = this.defaultNote;
+            }
 
-                // Handle different note types with appropriate synth calls
-                if (type === 'staccato' && note) {
-                    if (synth instanceof Tone.NoiseSynth) {
-                        synth.triggerAttackRelease(this.staccatoLength, time);
-                    } else {
-                        synth.triggerAttackRelease(note, this.staccatoLength, time);
-                    }
-                } else if (type === 'legato' && note) {
-                    if (synth instanceof Tone.NoiseSynth) {
-                        synth.triggerAttackRelease(this.legatoLength, time);
-                    } else {
-                        synth.triggerAttackRelease(note, this.legatoLength, time);
-                    }
-                } else if (type === 'normal' && note) {
-                    console.log(synth);
-                    if (synth instanceof Tone.NoiseSynth) {
-                        synth.triggerAttackRelease(this.defaultNote, time);
-                    } else {
-                        synth.triggerAttackRelease(note, this.defaultNote, time);
-                    }
-                } else if (type === 'continuous' && note && duration) {
-                    if (synth instanceof Tone.NoiseSynth) {
-                        synth.triggerAttackRelease(`0:${duration}:0`, time);
-                    } else {
-                        synth.triggerAttackRelease(note, `0:${duration}:0`, time);
-                    }
-                } else if (type === 'skip') {
-                    return;
-                }
+            // Create the event object
+            const event = {
+                time: currentTime,
+                note,
+                duration: noteDuration,
+                type
             };
+
+            // Update the current time for the next note
+            currentTime += Tone.Time(noteDuration).toSeconds();
+
+            return event;
         });
-
+        
         // Create and return the Tone.Sequence
-        return new Tone.Sequence(
-            (time: any, index: number) => actions[index](time), // Call the action for each event based on its index
-            times,
-            this.defaultNote
-        );
-    }
+        const part = new Tone.Part((time, event) => {
+            const { note, duration } = event;
 
-    public playAudio(sequenceList: Tone.Sequence[]) {
+            if (!note) return;
+
+            console.log(`Playing ${note} at ${time} for ${duration}`);
+
+            if (synth instanceof Tone.NoiseSynth) {
+                // Trigger the note on the synth
+                synth.triggerAttackRelease(duration, time);
+            } else {
+                // Trigger the note on the synth
+                synth.triggerAttackRelease(note, duration, time);
+            }
+        }, events);
+
+
+        part.loopEnd = currentTime; // Set the loop end to the total duration
+
+        return part;
+    }
+    
+    public playAudio(sequenceList: Tone.Part[]) {
         Tone.getTransport().bpm.value = this.BPM;
         Tone.loaded().then(() => {
-            sequenceList.forEach((sequence: Tone.Sequence) => {
+            sequenceList.forEach((sequence: Tone.Part) => {
                 sequence.loop = this.loop
                 sequence.start(0);
             });
