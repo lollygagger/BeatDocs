@@ -1,26 +1,32 @@
-// document.addEventListener('DOMContentLoaded', () => {
-//
-//     document.getElementById('ballz')?.addEventListener("click", pressShit);
-//     // const messageEl = document.getElementById("message");
-//     // if (messageEl) {
-//     //     messageEl.textContent = "Hello from your TypeScript-powered popup!";
-//     // }
-//    
-//     console.log(document.getElementById('ballz'));
-// });
-//
-// document.getElementById('ballz')?.addEventListener("click", () => console.log('aaa'));
-//
-// function pressShit() {
-//     console.log('ahhh');
-//
-//     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-//         if (tabs.length > 0 && tabs[0].url) {
-//             const currentUrl = tabs[0].url;
-//             await initialize(currentUrl);
-//         }
-//     });
-// }
-//
-//
-// // chrome.runtime.sendMessage({action: "popupOpened", "url": window.location.href});
+import {Document} from "./lib/interfaces/NoteInterface";
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('ballz')?.addEventListener("click", () => pressShit());
+});
+
+function pressShit() {
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+        if (tabs.length > 0 && tabs[0].url) {
+            const currentUrl = tabs[0].url;
+
+            chrome.runtime.sendMessage({ action: "getData", "url": currentUrl }, async (response: Document | undefined) => {
+                if (chrome.runtime.lastError) {
+                    console.error("Error sending message:", chrome.runtime.lastError);
+                    return;
+                }
+
+                if (!response) {
+                    console.error('No document recieved from worker')
+                    return
+                }
+                
+                if (!tabs[0].id) {
+                    console.error('No tab id found');
+                    return
+                }
+                
+                await chrome.tabs.sendMessage(tabs[0].id, {action: "startPlaying", "document": response});
+            });
+        }
+    });
+}
