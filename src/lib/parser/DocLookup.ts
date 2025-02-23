@@ -242,6 +242,12 @@ function extractDataFromTables(tables: Table[], docControls: DocAttributes): Tra
                     } else {
                         let noteType: NoteType = 'normal'
                         let note = rawNote.str
+                        let xNote = false
+                        
+                        if (note === 'X') {
+                            xNote = true
+                            note = 'C'
+                        }
                         
                         if (rawNote.staccato) {
                             noteType = 'staccato'
@@ -264,6 +270,12 @@ function extractDataFromTables(tables: Table[], docControls: DocAttributes): Tra
                                 octaveAdd = -1
                             }
                             
+                            let finalOctave = docControls.octave + octaveAdd
+                            
+                            if (xNote) {
+                                finalOctave = 4
+                            }
+                            
                             let modify = ''
                             
                             if (rawNote.modifier === 'flat') {
@@ -272,7 +284,7 @@ function extractDataFromTables(tables: Table[], docControls: DocAttributes): Tra
                                 modify = '#'
                             }
                             
-                            noteObject.note = `${note}${modify}${docControls.octave + octaveAdd}`
+                            noteObject.note = `${note}${modify}${finalOctave}`
                         }
                         
                         noteObject.duration = rawNote.count
@@ -408,6 +420,22 @@ function parseEffects(tracks: Track[], docTab: DocTab): void {
                 let effects: BeatEffect[] = []
                 let inInstrument = true
                 
+                let currentBulletStruct: Record<string, any> = {}
+                let bulletTitle: string | undefined = undefined
+                let inBullet = false
+                
+                function resetBulletPointStruct() {
+                    console.log(`-------------------- Ending bullet point struct for ${bulletTitle ?? '?'}`);
+                    console.log(currentBulletStruct);
+                    // effects[effects.length - 1].options[bulletTitle ?? '?'] = currentBulletStruct
+                    
+                    instrument.properties[bulletTitle ?? '?'] = currentBulletStruct ?? {'idk': '?'};
+
+                    currentBulletStruct = {}
+                    bulletTitle = undefined
+                    inBullet = false
+                }
+                
                 let trackName = '?'
                 if (tableRow.tableCells[0].content && tableRow.tableCells[0].content[0]) {
                     trackName = getStringFromStrEl(tableRow.tableCells[0].content[0]).trim()
@@ -415,25 +443,65 @@ function parseEffects(tracks: Track[], docTab: DocTab): void {
 
                 instrument.name = trackName
                 console.log(`Stuff for ${trackName}`);
+                
+                if (trackName === 'MetalSynth') {
+                    console.log('---------------------------------------------------====================--------------------------');
+                    console.log(tableRow.tableCells[1].content);
+                }
 
                 if (tableRow.tableCells[1].content) {
                     for (const con of tableRow.tableCells[1].content) {
                         console.log('Con:');
+                        console.log(con);
                         let isBold = con.paragraph?.elements?.[0]?.textRun?.textStyle?.bold ?? false
+                        let isBulletPoint = con.paragraph?.bullet !== undefined;
+                        
                         
                         if (isBold) {
+                            if (inBullet) {
+                                resetBulletPointStruct()
+                            }
+                            
                             inInstrument = false
                             effects.push({name: getStringFromStrEl(con).trim().toLowerCase(), options: {}})
                         } else {
                             let propLine = getStringFromStrEl(con)
                             let props = propLine.split(':').map(item => item.trim())
+                            console.log(`(${isBulletPoint}) PROPS::::`);
+                            console.log(props);
                             
                             if (props[0] === '') {
                                 continue
                             }
                             
+                            console.log(111);
+                            
+                            console.log(`${props.length === 1} || ${props[0].length === 0}    and ${inBullet}  isPoint = ${isBulletPoint}`);
+                            if (props.length === 1 || props[1].length === 0) { // Start of a bulleted list, e.g. "Envelope:"
+                                if (inBullet) {
+                                    resetBulletPointStruct()
+                                }
+                                
+                                inBullet = true
+                                bulletTitle = props[0]
+                                currentBulletStruct = {}
+                                continue
+                            }
+                            
+                            if (!isBulletPoint && inBullet) { // If defining single property NOT in bullet point but also WAS listing bullets...
+                                console.log(222);
+                                resetBulletPointStruct()
+                            }
+                            
                             if (inInstrument) {
-                                instrument.properties[props[0]] = props[1]
+                                if (inBullet) {
+                                    console.log(444);
+                                    console.log(`Setting ${props[0]} = ${props[1]}`);
+                                    currentBulletStruct[props[0]] = props[1];
+                                } else {
+                                    console.log(333);
+                                    instrument.properties[props[0]] = props[1]
+                                }
                             } else { // Editing effect
                                 console.log(`Set effect ${props[0]} = ${props[1]}`);
                                 effects[effects.length - 1].options[props[0]] = props[1]
@@ -451,19 +519,10 @@ function parseEffects(tracks: Track[], docTab: DocTab): void {
                 const matchingTrack = tracks.find(track => track.name === instrument.name);
                 if (matchingTrack?.metadata) {
                     matchingTrack.metadata.effects = effects
+                    matchingTrack.metadata.instrument = instrument
                 }
                 
                 console.log('Matching Track:', matchingTrack);
-                
-                // let elems = el.paragraph?.elements
-                // if (!elems) continue
-                // console.log(elems);
-                //
-                // let pa = elems.shift()?.textRun?.content;
-                // if (!pa) continue
-                //
-                // console.log('Instrument content:');
-                // console.log(pa)
             }
         }
     }
