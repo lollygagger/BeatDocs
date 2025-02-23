@@ -1,4 +1,5 @@
 import {
+    DocTab,
     DocumentTab,
     RgbColor,
     rgbColorEquals,
@@ -6,7 +7,16 @@ import {
     Table,
     TableCell,
 } from "./GoogleInterfaces";
-import {DocAttributes, Document, NoteObject, NoteType, Track} from "../interfaces/NoteInterface";
+import {
+    BeatEffect,
+    BeatInstrument,
+    DocAttributes,
+    Document,
+    Metadata,
+    NoteObject,
+    NoteType,
+    Track
+} from "../interfaces/NoteInterface";
 import {orchestratePlay} from "../player/Player";
 
 /**
@@ -379,6 +389,86 @@ function parseDocument(docData: DocumentTab): Document | undefined {
     } as Document
 }
 
+function parseEffects(tracks: Track[], docTab: DocTab): void {
+    console.log(`MeEffect tab: ${docTab.tabProperties.title}`);
+    let docData = docTab.documentTab
+    
+    const cont = docData.body?.content
+    if (!cont) return
+    
+    console.log('----------');
+    for (const el of cont) {
+        let row = 0
+        if (el.table?.tableRows) {
+            for (let tableRow of el.table.tableRows) {
+                if (row++ === 0) continue
+                if (!tableRow.tableCells) continue
+                
+                let instrument: BeatInstrument = {name: '?', properties: {}}
+                let effects: BeatEffect[] = []
+                let inInstrument = true
+                
+                let trackName = '?'
+                if (tableRow.tableCells[0].content && tableRow.tableCells[0].content[0]) {
+                    trackName = getStringFromStrEl(tableRow.tableCells[0].content[0]).trim()
+                }
+
+                instrument.name = trackName
+                console.log(`Stuff for ${trackName}`);
+
+                if (tableRow.tableCells[1].content) {
+                    for (const con of tableRow.tableCells[1].content) {
+                        console.log('Con:');
+                        let isBold = con.paragraph?.elements?.[0]?.textRun?.textStyle?.bold ?? false
+                        
+                        if (isBold) {
+                            inInstrument = false
+                            effects.push({name: getStringFromStrEl(con).trim().toLowerCase(), options: {}})
+                        } else {
+                            let propLine = getStringFromStrEl(con)
+                            let props = propLine.split(':').map(item => item.trim())
+                            
+                            if (props[0] === '') {
+                                continue
+                            }
+                            
+                            if (inInstrument) {
+                                instrument.properties[props[0]] = props[1]
+                            } else { // Editing effect
+                                console.log(`Set effect ${props[0]} = ${props[1]}`);
+                                effects[effects.length - 1].options[props[0]] = props[1]
+                            }
+                        }
+                    }
+                }
+                
+                console.log('Instrument:');
+                console.log(instrument);
+                
+                console.log('Effects:');
+                console.log(effects);
+
+                const matchingTrack = tracks.find(track => track.name === instrument.name);
+                if (matchingTrack?.metadata) {
+                    matchingTrack.metadata.effects = effects
+                }
+                
+                console.log('Matching Track:', matchingTrack);
+                
+                // let elems = el.paragraph?.elements
+                // if (!elems) continue
+                // console.log(elems);
+                //
+                // let pa = elems.shift()?.textRun?.content;
+                // if (!pa) continue
+                //
+                // console.log('Instrument content:');
+                // console.log(pa)
+            }
+        }
+    }
+}
+
 export async function initializeDocContents(tab: string): Promise<Document | undefined> {
     // Try to parse the docId from the current tab's URL
     const docId = getDocIdFromUrl(tab);
@@ -396,11 +486,14 @@ export async function initializeDocContents(tab: string): Promise<Document | und
         let effectTab = docTabs[1]
         
         const parsedDocument = parseDocument(mainTab.documentTab);
+
+        parseEffects(parsedDocument?.tracks ?? [], effectTab)
+        
+        console.log('After tracks:');
+        console.log(parsedDocument?.tracks);
         
         console.log('Returning parsed doc');
         return parsedDocument
-
-        // await orchestratePlay(parsedDocument)
     } catch (err) {
         console.error("Error fetching doc:", err);
     }
