@@ -8,6 +8,40 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('off')?.addEventListener("click", () => (stopShit()));
 });
 
+// document.addEventListener('DOMContentLoaded', () => {
+//     document.getElementById('record')?.addEventListener("click", () => (stopShit()));
+// });
+
+// let audioBlob;
+// let recorder: MediaRecorder;
+// let audioUrl;
+//
+// // Record audio
+// async function recordAudio() {
+//     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+//     recorder = new MediaRecorder(stream);
+//     const audioChunks: BlobPart[] | undefined = [];
+//
+//     recorder.ondataavailable = function(event) {
+//         audioChunks.push(event.data);
+//     };
+//
+//     recorder.onstop = async function() {
+//         audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+//         audioUrl = URL.createObjectURL(audioBlob);
+//         console.log('Recording complete.');
+//
+//         // Show upload button after recording
+//         // @ts-ignore
+//         document.getElementById('uploadButton').style.display = 'block';
+//     };
+//
+//     recorder.start();
+//     setTimeout(() => {
+//         recorder.stop();
+//     }, 5000); // Stop after 5 seconds (adjust this as needed)
+// };
+
 function stopShit() {
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
         if (tabs.length > 0 && tabs[0].url) {

@@ -2,12 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Extension Popup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeatDocs</title>
+    <style>
+        /* Reset default margin/padding for better styling control */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-width: 350px;  /* Prevent it from being too small */
+            min-height: 250px; /* Prevent it from being too small */
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Header Styling */
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        /* Button Styling */
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 8px 0;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 80%;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Upload Button Hidden State */
+        #uploadButton {
+            visibility: hidden;
+        }
+
+        /* Small Spacing for Buttons */
+        .button-container {
+            width: 100%;
+            max-width: 700px;  /* Adjust container width */
+            margin-top: 20px;
+        }
+
+        #off {
+            background-color: darkgrey;
+        }
+
+    </style>
 </head>
 <body>
-<h1 id="message">Loading...</h1>
-<button id="ballz">Start Audio</button>
-<button id="off">Stop Audio</button>
+
+<h1>BeatDocs</h1>
+
+<div class="button-container">
+    <button id="ballz">Start Audio</button>
+    <button id="off">Stop Audio</button>
+    <button id="record">Record a Sample</button>
+    <button id="uploadButton">Upload your recorded Sample</button>
+</div>
+
 <script src="popup.js"></script>
 </body>
 </html>
