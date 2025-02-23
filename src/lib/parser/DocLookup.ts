@@ -473,7 +473,7 @@ function parseEffects(tracks: Track[], docTab: DocTab): void {
                             effects.push({name: getStringFromStrEl(con).trim().toLowerCase(), options: {}})
                         } else {
                             let propLine = getStringFromStrEl(con)
-                            let props = propLine.split(':').map(item => item.trim())
+                            let props = propLine.split(/:(.+)/).map(item => item.trim())
                             console.log(`(${isBulletPoint}) PROPS::::`);
                             console.log(props);
                             
