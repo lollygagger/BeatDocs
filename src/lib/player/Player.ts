@@ -39,8 +39,8 @@ export class Player {
     public BPM: number;
     public loop: boolean;
 
-    private defaultNote = "4n"
-    private oneBeatInSeconds = 0.03
+    private defaultNote = "0:1:0"
+    private oneBeatInSeconds = 60 / Tone.getTransport().bpm.value
 
     //create longer and shorter releases based on the bpm
     private staccatoLength = this.oneBeatInSeconds - (0.05 * this.oneBeatInSeconds)
@@ -50,22 +50,6 @@ export class Player {
         this.loop = loop;
         this.BPM = bpm;
     }
-
-    private track1Notes: NoteObject[] = [
-        { type: "staccato", note: "A4" },
-        { type: "legato", note: "C3" },
-        { type: "normal", note: "A#4" },
-        { type: "skip"},
-        { type: "normal", note: "G4" }
-    ];
-
-    private track2Notes: NoteObject[] = [
-        { type: "normal", note: "B4" },
-        { type: "normal", note: "B3" },
-        { type: "normal", note: "F#3" },
-        { type: "skip"},
-        { type: "normal", note: "G4" }
-    ];
 
     public createSequenceFromTrack(synth: any, track: NoteObject[]): Tone.Sequence {
         // Create an array of times and corresponding actions for the sequence
@@ -100,6 +84,7 @@ export class Player {
     }
 
     public playAudio(sequenceList: Tone.Sequence[]){
+        Tone.getTransport().bpm.value = this.BPM;
         sequenceList.forEach((sequence: Tone.Sequence) => {
             sequence.loop = this.loop
             sequence.start(0);
