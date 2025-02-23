@@ -2,7 +2,6 @@ import {BeatEffect, Document, NoteObject} from "../interfaces/NoteInterface";
 import {createSynthFromInstrument} from "./InstrumentFactory";
 import {connectEffects, createEffect} from "./EffectFactory";
 import * as Tone from 'tone';
-import {start} from "tone";
 
 export async function orchestratePlay(document: Document) {
     //first parse settings and create a player object
@@ -18,13 +17,15 @@ export async function orchestratePlay(document: Document) {
 
         if(track.metadata.effects){
             console.log("Creating Effects")
-            let effects: BeatEffect[] = []
+            let effects: any[] = []
             track.metadata.effects.forEach(effect => {
                 effects.push(createEffect(effect))
             })
-
-            console.log("Connecting Effects to Instrument")
-            connectEffects(synth, effects)
+            
+            if (effects.length !== 0) {
+                console.log("Connecting Effects to Instrument")
+                connectEffects(synth, effects)
+            }
         }
 
         console.log("Creating Sequence")
@@ -57,6 +58,8 @@ export class Player {
         const actions = track.map((noteObj) => {
             return (time: any) => {
                 const { type, note, duration } = noteObj;
+                
+                if (note === undefined) return;
                 
                 console.log(`Playing ${note} at ${time}`);
 
