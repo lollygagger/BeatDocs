@@ -13,6 +13,8 @@ export function createSynthFromInstrument(instrument: BeatInstrument): any {
             return new Tone.Sampler(instrument.properties);
         case "Synth":
             return new Tone.Synth(instrument.properties);
+        case "NoiseSynth":
+            return new Tone.NoiseSynth(instrument.properties);
 
         default:
             throw new Error(`Instrument type ${instrument.name} is not supported`);
