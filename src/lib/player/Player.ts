@@ -107,7 +107,7 @@ export class Player {
         Tone.getTransport().start();
     }
 
-    public stopAudio(){
+    public static stopAudio(){
         Tone.getTransport().stop();
     }
 }

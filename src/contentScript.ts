@@ -1,5 +1,5 @@
 // This code will run on pages that match the content script criteria.
-import {orchestratePlay} from "./lib/player/Player";
+import {orchestratePlay, Player} from "./lib/player/Player";
 import {Document} from "./lib/interfaces/NoteInterface";
 
 console.log("Content script loaded!");
@@ -18,3 +18,10 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         return true;
     }
 });
+
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+    if (request.action === "stopPlaying"){
+        console.log("Background received request to stop audio");
+        Player.stopAudio()
+    }
+})

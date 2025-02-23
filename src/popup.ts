@@ -4,6 +4,23 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('ballz')?.addEventListener("click", () => pressShit());
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('off')?.addEventListener("click", () => (stopShit()));
+});
+
+function stopShit() {
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+        if (tabs.length > 0 && tabs[0].url) {
+
+            if (!tabs[0].id) {
+                console.error('No tab id found');
+                return
+            }
+
+            await chrome.tabs.sendMessage(tabs[0].id, {action: "stopPlaying"});
+        }})
+}
+
 function pressShit() {
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
         if (tabs.length > 0 && tabs[0].url) {
