@@ -11,6 +11,8 @@ export function createSynthFromInstrument(instrument: BeatInstrument): any {
             return new Tone.MembraneSynth(instrument.properties);
         case "Sampler":
             return new Tone.Sampler(instrument.properties);
+        case "Synth":
+            return new Tone.Synth(instrument.properties);
 
         default:
             throw new Error(`Instrument type ${instrument.name} is not supported`);
