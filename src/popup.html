@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BeatDocs</title>
     <style>
-        /* Reset default margin/padding for better styling control */
         * {
             margin: 0;
             padding: 0;
@@ -22,8 +21,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-width: 350px;  /* Prevent it from being too small */
-            min-height: 250px; /* Prevent it from being too small */
+            min-width: 350px;
+            min-height: 250px;
             text-align: center;
             width: 100%;
         }
@@ -54,11 +53,6 @@
             background-color: #45a049;
         }
 
-        /* Upload Button Hidden State */
-        #uploadButton {
-            visibility: hidden;
-        }
-
         /* Small Spacing for Buttons */
         .button-container {
             width: 100%;
@@ -79,8 +73,6 @@
 <div class="button-container">
     <button id="ballz">Start Audio</button>
     <button id="off">Stop Audio</button>
-    <button id="record">Record a Sample</button>
-    <button id="uploadButton">Upload your recorded Sample</button>
 </div>
 
 <script src="popup.js"></script>

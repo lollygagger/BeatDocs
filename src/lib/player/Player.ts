@@ -88,9 +88,11 @@ export class Player {
 
     public playAudio(sequenceList: Tone.Sequence[]){
         Tone.getTransport().bpm.value = this.BPM;
-        sequenceList.forEach((sequence: Tone.Sequence) => {
-            sequence.loop = this.loop
-            sequence.start(0);
+        Tone.loaded().then(() => {
+            sequenceList.forEach((sequence: Tone.Sequence) => {
+                sequence.loop = this.loop
+                sequence.start(0);
+            });
         });
         Tone.getTransport().start();
     }
