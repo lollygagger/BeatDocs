@@ -65,13 +65,30 @@ export class Player {
 
                 // Handle different note types with appropriate synth calls
                 if (type === 'staccato' && note) {
-                    synth.triggerAttackRelease(note, this.staccatoLength, time);
+                    if (synth instanceof Tone.NoiseSynth) {
+                        synth.triggerAttackRelease(this.staccatoLength, time);
+                    } else {
+                        synth.triggerAttackRelease(note, this.staccatoLength, time);
+                    }
                 } else if (type === 'legato' && note) {
-                    synth.triggerAttackRelease(note, this.legatoLength, time);
+                    if (synth instanceof Tone.NoiseSynth) {
+                        synth.triggerAttackRelease(this.legatoLength, time);
+                    } else {
+                        synth.triggerAttackRelease(note, this.legatoLength, time);
+                    }
                 } else if (type === 'normal' && note) {
-                    synth.triggerAttackRelease(note, this.defaultNote, time);
+                    console.log(synth);
+                    if (synth instanceof Tone.NoiseSynth) {
+                        synth.triggerAttackRelease(this.defaultNote, time);
+                    } else {
+                        synth.triggerAttackRelease(note, this.defaultNote, time);
+                    }
                 } else if (type === 'continuous' && note && duration) {
-                    synth.triggerAttackRelease(note, `0:${duration}:0`, time);
+                    if (synth instanceof Tone.NoiseSynth) {
+                        synth.triggerAttackRelease(`0:${duration}:0`, time);
+                    } else {
+                        synth.triggerAttackRelease(note, `0:${duration}:0`, time);
+                    }
                 } else if (type === 'skip') {
                     return;
                 }
