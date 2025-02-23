@@ -10,6 +10,8 @@ export function createSynthFromInstrument(instrument: BeatInstrument): any {
         case "MembraneSynth":
             return new Tone.MembraneSynth(instrument.properties);
         case "Sampler":
+            console.log(`New sampler crated with url:`)
+            console.log(instrument.properties)
             return new Tone.Sampler({C4: instrument.properties.url});
         case "Synth":
             return new Tone.Synth(instrument.properties);

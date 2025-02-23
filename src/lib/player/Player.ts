@@ -120,12 +120,13 @@ export class Player {
     public playAudio(sequenceList: Tone.Part[]) {
         Tone.getTransport().bpm.value = this.BPM;
         Tone.loaded().then(() => {
-            sequenceList.forEach((sequence: Tone.Part) => {
-                sequence.loop = this.loop
-                sequence.start(0);
+            sequenceList.forEach((part: Tone.Part) => {
+                part.loop = this.loop
+                part.start(0);
             });
         });
         Tone.getTransport().start();
+
     }
 
     public static stopAudio() {
