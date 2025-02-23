@@ -23,6 +23,9 @@ export function createEffect(effect: BeatEffect): any {
         case 'vibrato':
             return new Tone.Vibrato(effect.options).toDestination();
 
+        case 'phaser':
+            return new Tone.Phaser(effect.options).toDestination();
+
         default:
             throw new Error(`Effect type ${effect.name} is not supported`);
     }
