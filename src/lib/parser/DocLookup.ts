@@ -270,6 +270,7 @@ function extractDataFromTables(tables: Table[], docControls: DocAttributes): Tra
                                 octaveAdd = -1
                             }
                             
+                            console.log(`${docControls.octave} + ${octaveAdd} = ${docControls.octave + octaveAdd}`);
                             let finalOctave = docControls.octave + octaveAdd
                             
                             if (xNote) {
@@ -283,6 +284,10 @@ function extractDataFromTables(tables: Table[], docControls: DocAttributes): Tra
                             } else if (rawNote.modifier === 'sharp') {
                                 modify = '#'
                             }
+                            
+                            console.log(`huhhh '${note}' '${modify}' '${finalOctave}'`);
+                            console.log(`m,odifyyyy for == ${note}${modify}${finalOctave}`);
+                            console.log(modify);
                             
                             noteObject.note = `${note}${modify}${finalOctave}`
                         }

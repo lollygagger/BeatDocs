@@ -35,6 +35,10 @@ export function createEffect(effect: BeatEffect): any {
 }
 
 export function connectEffects(synth: any, effects: any[]){
+    if (effects.length === 0) {
+        return synth.toDestination();
+    }
+    
     let last = effects.reduce((lastNode, effect) => lastNode.connect(effect), synth);
     last.toDestination()
 }

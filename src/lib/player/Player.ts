@@ -68,7 +68,9 @@ export class Player {
             // Determine the duration of the note
             let noteDuration;
             if (type === 'staccato') {
-                noteDuration = `0:${this.staccatoLength}:0`;
+                console.log('STAC');
+                console.log(this.staccatoLength);
+                noteDuration = `0:2:0`;
             } else if (type === 'legato') {
                 noteDuration = `0:${this.legatoLength}:0`;
             } else if (type === 'continuous' && duration) {
@@ -98,6 +100,7 @@ export class Player {
             if (!note) return;
 
             console.log(`Playing ${note} at ${time} for ${duration}`);
+            console.log(synth);
 
             if (synth instanceof Tone.NoiseSynth) {
                 // Trigger the note on the synth
