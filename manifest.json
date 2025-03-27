@@ -7,7 +7,9 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_popup_width": 700,
+    "default_popup_height": 400
   },
   "content_scripts": [
     {
@@ -18,10 +20,11 @@
   "permissions": [
     "identity",
     "storage",
-    "activeTab"
+    "activeTab",
+    "microphone"
   ],
   "oauth2": {
-    "client_id": "718961512533-gudhtg4jdgc9q830c8gmoscij0hjb7jl.apps.googleusercontent.com",
+    "client_id": "32975098999-sqla5kpa00nlertlq9dqfo6v401g0jov.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/documents.readonly"
     ]

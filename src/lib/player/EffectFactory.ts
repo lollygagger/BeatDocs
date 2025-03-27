@@ -13,8 +13,6 @@ export function createEffect(effect: BeatEffect): any {
             return new Tone.Chorus(effect.options).toDestination();
 
         case 'distortion':
-            console.log('NMAKLING DIST EFFECT');
-            console.log(effect.options);
             return new Tone.Distortion({distortion: 0.9}).toDestination();
 
         case 'autowah':

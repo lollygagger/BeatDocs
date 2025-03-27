@@ -36,10 +36,6 @@ export async function orchestratePlay(document: Document) {
 
     console.log("Playing sequences")
     player.playAudio(sequences)
-    // sequences.forEach(part => part.start(0));
-    //
-    // // Start the Tone.Transport to begin playback
-    // Tone.getTransport().start();
 }
 
 export class Player {
@@ -68,8 +64,6 @@ export class Player {
             // Determine the duration of the note
             let noteDuration;
             if (type === 'staccato') {
-                console.log('STAC');
-                console.log(this.staccatoLength);
                 noteDuration = `0:2:0`;
             } else if (type === 'legato') {
                 noteDuration = `0:${this.legatoLength}:0`;
