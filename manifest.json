@@ -24,7 +24,7 @@
     "microphone"
   ],
   "oauth2": {
-    "client_id": "32975098999-sqla5kpa00nlertlq9dqfo6v401g0jov.apps.googleusercontent.com",
+    "client_id": "<id>.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/documents.readonly"
     ]
